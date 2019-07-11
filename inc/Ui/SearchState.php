@@ -2,6 +2,8 @@
 
 namespace dokuwiki\Ui;
 
+use Doku_Event;
+
 class SearchState
 {
     /**
@@ -141,6 +143,9 @@ class SearchState
                 $hrefAttributes[$param] = $value;
             }
         }
+        // search extensions can add query parameters for all links
+        trigger_event('FORM_SEARCH_FILTERLINK', $hrefAttributes);
+
 
         $href = wl($ID, $hrefAttributes, false, '&');
         return "<a href='$href' " . buildAttributes($tagAttributes, true) . ">$label</a>";
