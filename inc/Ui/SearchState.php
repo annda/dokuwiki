@@ -135,6 +135,13 @@ class SearchState
             $hrefAttributes['srt'] = $parsedQuery['sort'];
         }
 
+        // search extensions can add their own query parameters here when they use this method
+        if (isset($parsedQuery['additionalSearchParams'])) {
+            foreach ($parsedQuery['additionalSearchParams'] as $param => $value) {
+                $hrefAttributes[$param] = $value;
+            }
+        }
+
         $href = wl($ID, $hrefAttributes, false, '&');
         return "<a href='$href' " . buildAttributes($tagAttributes, true) . ">$label</a>";
     }
