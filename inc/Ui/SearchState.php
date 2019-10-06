@@ -119,6 +119,18 @@ class SearchState
             'target' => $conf['target']['wiki'],
         ];
 
+        // search extensions can add parameters to query when they construct own links using this method
+        if (isset($parsedQuery['additionalSearchParams'])) {
+            foreach ($parsedQuery['additionalSearchParams'] as $param => $value) {
+                // FIXME ft_queryUnparser_simple does not support complex operators so we just add another "and" term
+                if ($param === 'q') {
+                    $parsedQuery['and'][] = $value;
+                } else {
+                    $hrefAttributes[$param] = $value;
+                }
+            }
+        }
+
         $newQuery = ft_queryUnparser_simple(
             $parsedQuery['and'],
             $parsedQuery['not'],
@@ -126,6 +138,7 @@ class SearchState
             $parsedQuery['ns'],
             $parsedQuery['notns']
         );
+
         $hrefAttributes = ['do' => 'search', 'sf' => '1', 'q' => $newQuery];
         if ($parsedQuery['after']) {
             $hrefAttributes['min'] = $parsedQuery['after'];
@@ -137,13 +150,8 @@ class SearchState
             $hrefAttributes['srt'] = $parsedQuery['sort'];
         }
 
-        // search extensions can add their own query parameters here when they use this method
-        if (isset($parsedQuery['additionalSearchParams'])) {
-            foreach ($parsedQuery['additionalSearchParams'] as $param => $value) {
-                $hrefAttributes[$param] = $value;
-            }
-        }
-        // search extensions can add query parameters for all links
+        // FIXME enable extending the "q" param here too
+        // search extensions can add query parameters for all search linkss
         trigger_event('FORM_SEARCH_FILTERLINK', $hrefAttributes);
 
 
